@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dominoes Game</title>
+
+<style>
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+
+    body {
+        font-family: Arial, sans-serif;
+        background: linear-gradient(135deg, #075e54, #0b8f6c);
+        min-height: 100vh;
+        color: white;
+        overflow-x: hidden;
+    }
+
+    .game {
+        width: 95%;
+        max-width: 1100px;
+        margin: auto;
+        padding: 20px;
+        text-align: center;
+    }
+
+    h1 {
+        font-size: 42px;
+        margin-bottom: 5px;
+        text-shadow: 2px 2px 5px #003d35;
+    }
+
+    .subtitle {
+        margin-bottom: 15px;
+        opacity: 0.9;
+    }
+
+    .scoreboard {
+        display: flex;
+        justify-content: center;
+        gap: 30px;
+        margin: 15px auto;
+        flex-wrap: wrap;
+    }
+
+    .score {
+        background: rgba(0,0,0,0.25);
+        padding: 10px 25px;
+        border-radius: 12px;
+        font-size: 18px;
+    }
+
+    .table {
+        background: #145c43;
+        border: 10px solid #743f20;
+        border-radius: 30px;
+        min-height: 430px;
+        padding: 25px;
+        box-shadow: inset 0 0 25px rgba(0,0,0,.5),
+                    0 10px 30px rgba(0,0,0,.3);
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: auto;
+    }
+
+    #board {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        flex-wrap: wrap;
+        min-width: 250px;
+        max-width: 950px;
+    }
+
+    .domino {
+        width: 72px;
+        height: 38px;
+        background: #f8f2dc;
+        border: 2px solid #222;
+        border-radius: 7px;
+        display: flex;
+        color: #111;
+        box-shadow: 2px 3px 5px rgba(0,0,0,.4);
+        flex-shrink: 0;
+    }
+
+    .half {
+        width: 50%;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+    }
+
+    .half:first-child {
+        border-right: 2px solid #333;
+    }
+
+    .pip-container {
+        width: 25px;
+        height: 25px;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        grid-template-rows: repeat(3, 1fr);
+        padding: 3px;
+    }
+
+    .pip {
+        width: 5px;
+        height: 5px;
+        background: #111;
+        border-radius: 50%;
+        align-self: center;
+        justify-self: center;
+    }
+
+    .hand-area {
+        margin-top: 20px;
+    }
+
+    .hand-title {
+        margin-bottom: 10px;
+        font-size: 20px;
+    }
+
+    #playerHand {
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .player-tile {
+        width: 76px;
+        height: 42px;
+        background: #fff7df;
+        border: 2px solid #222;
+        border-radius: 8px;
+        display: flex;
+        color: #111;
+        cursor: pointer;
+        transition: .2s;
+        box-shadow: 2px 3px 5px rgba(0,0,0,.4);
+    }
+
+    .player-tile:hover {
+        transform: translateY(-10px) scale(1.05);
+        border-color: #ffd43b;
+    }
+
+    .player-tile.disabled {
+        opacity: .45;
+        cursor: not-allowed;
+    }
+
+    .player-tile .half:first-child {
+        border-right: 2px solid #333;
+    }
+
+    .controls {
+        margin-top: 20px;
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    button {
+        border: none;
+        padding: 12px 22px;
+        border-radius: 10px;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+        background: #ffd43b;
+        color: #222;
+        transition: .2s;
+    }
+
+    button:hover {
+        transform: translateY(-2px);
+        background: #ffe477;
+    }
+
+    button:disabled {
+        opacity: .5;
+        cursor: not-allowed;
+    }
+
+    #message {
+        min-height: 30px;
+        margin-top: 15px;
+        font-size: 18px;
+        font-weight: bold;
+    }
+
+    .computer {
+        margin-bottom: 10px;
+        color: #ddd;
+    }
+
+    .hidden-tiles {
+        display: flex;
+        justify-content: center;
+        gap: 5px;
+        margin-bottom: 15px;
+    }
+
+    .back-tile {
+        width: 35px;
+        height: 50px;
+        background: repeating-linear-gradient(
+            45deg,
+            #9c2d2d,
+            #9c2d2d 5px,
+            #d14949 5px,
+            #d14949 10px
+        );
+        border: 2px solid white;
+        border-radius: 5px;
+    }
+
+    .empty {
+        opacity: .7;
+        font-size: 20px;
+    }
+
+    @media(max-width:600px) {
+        h1 {
+            font-size: 30px;
+        }
+
+        .table {
+            min-height: 300px;
+            padding: 12px;
+        }
+
+        .domino {
+            width: 58px;
+            height: 32px;
+        }
+
+        .player-tile {
+            width: 62px;
+            height: 36px;
+        }
+    }
+</style>
+</head>
+
+<body>
+
+<div class="game">
+
+    <h1>🁫 DOMINOES 🁣</h1>
+    <p class="subtitle">Classic Dominoes — Player vs Computer</p>
+
+    <div class="scoreboard">
+        <div class="score">
+            👤 You: <span id="playerScore">0</span>
+        </div>
+
+        <div class="score">
+            🤖 Computer: <span id="computerScore">0</span>
+        </div>
+    </div>
+
+    <div class="computer">
+        Computer's tiles
+        <div class="hidden-tiles" id="computerHand"></div>
+    </div>
+
+    <div class="table">
+        <div id="board">
+            <div class="empty">The domino table is empty</div>
+        </div>
+    </div>
+
+    <div id="message">Choose a domino to begin!</div>
+
+    <div class="hand-area">
+        <div class="hand-title">🎮 Your Hand</div>
+        <div id="playerHand"></div>
+    </div>
+
+    <div class="controls">
+        <button id="drawBtn">Draw Tile</button>
+        <button id="passBtn">Pass</button>
+        <button id="restartBtn">🔄 New Game</button>
+    </div>
+
+</div>
+
+<script>
+
+const board = document.getElementById("board");
+const playerHandElement = document.getElementById("playerHand");
+const computerHandElement = document.getElementById("computerHand");
+const message = document.getElementById("message");
+
+const playerScoreElement = document.getElementById("playerScore");
+const computerScoreElement = document.getElementById("computerScore");
+
+const drawBtn = document.getElementById("drawBtn");
+const passBtn = document.getElementById("passBtn");
+const restartBtn = document.getElementById("restartBtn");
+
+let deck = [];
+let playerHand = [];
+let computerHand = [];
+let boardTiles = [];
+
+let playerScore = 0;
+let computerScore = 0;
+
+let gameOver = false;
+let playerTurn = true;
+
+
+/* -----------------------------
+   CREATE DOMINO DECK
+----------------------------- */
+
+function createDeck() {
+
+    deck = [];
+
+    for(let a = 0; a <= 6; a++) {
+
+        for(let b = a; b <= 6; b++) {
+
+            deck.push({
+                a: a,
+                b: b
+            });
+
+        }
+
+    }
+
+}
+
+
+/* -----------------------------
+   SHUFFLE
+----------------------------- */
+
+function shuffle(array) {
+
+    for(let i = array.length - 1; i > 0; i--) {
+
+        let j = Math.floor(Math.random() * (i + 1));
+
+        [array[i], array[j]] = [array[j], array[i]];
+
+    }
+
+}
+
+
+/* -----------------------------
+   START GAME
+----------------------------- */
+
+function startGame() {
+
+    createDeck();
+    shuffle(deck);
+
+    playerHand = deck.splice(0, 7);
+    computerHand = deck.splice(0, 7);
+
+    boardTiles = [];
+
+    gameOver = false;
+    playerTurn = true;
+
+    message.textContent = "Your turn! Play a matching domino.";
+
+    render();
+
+}
+
+
+/* -----------------------------
+   CREATE PIPS
+----------------------------- */
+
+const pipPositions = {
+
+    0: [],
+    1: [4],
+    2: [0,8],
+    3: [0,4,8],
+    4: [0,2,6,8],
+    5: [0,2,4,6,8],
+    6: [0,2,3,5,6,8]
+
+};
+
+
+function createPips(number) {
+
+    const container = document.createElement("div");
+
+    container.className = "pip-container";
+
+    for(let i = 0; i < 9; i++) {
+
+        const pip = document.createElement("span");
+
+        if(pipPositions[number].includes(i)) {
+            pip.className = "pip";
+        }
+
+        container.appendChild(pip);
+
+    }
+
+    return container;
+
+}
+
+
+/* -----------------------------
+   CREATE TILE
+----------------------------- */
+
+function createTile(tile, clickable = false, index = null) {
+
+    const domino = document.createElement("div");
+
+    domino.className = clickable
+        ? "player-tile"
+        : "domino";
+
+    const left = document.createElement("div");
+    const right = document.createElement("div");
+
+    left.className = "half";
+    right.className = "half";
+
+    left.appendChild(createPips(tile.a));
+    right.appendChild(createPips(tile.b));
+
+    domino.appendChild(left);
+    domino.appendChild(right);
+
+    if(clickable) {
+
+        domino.addEventListener("click", () => {
+
+            playPlayerTile(index);
+
+        });
+
+    }
+
+    return domino;
+
+}
+
+
+/* -----------------------------
+   RENDER GAME
+----------------------------- */
+
+function render() {
+
+    renderBoard();
+    renderPlayerHand();
+    renderComputerHand();
+
+    playerScoreElement.textContent = playerScore;
+    computerScoreElement.textContent = computerScore;
+
+}
+
+
+/* -----------------------------
+   RENDER BOARD
+----------------------------- */
+
+function renderBoard() {
+
+    board.innerHTML = "";
+
+    if(boardTiles.length === 0) {
+
+        board.innerHTML =
+            '<div class="empty">The domino table is empty</div>';
+
+        return;
+
+    }
+
+    boardTiles.forEach(tile => {
+
+        board.appendChild(createTile(tile));
+
+    });
+
+}
+
+
+/* -----------------------------
+   RENDER PLAYER HAND
+----------------------------- */
+
+function renderPlayerHand() {
+
+    playerHandElement.innerHTML = "";
+
+    playerHand.forEach((tile, index) => {
+
+        const element = createTile(tile, true, index);
+
+        if(!playerTurn || gameOver) {
+            element.classList.add("disabled");
+        }
+
+        playerHandElement.appendChild(element);
+
+    });
+
+}
+
+
+/* -----------------------------
+   RENDER COMPUTER HAND
+----------------------------- */
+
+function renderComputerHand() {
+
+    computerHandElement.innerHTML = "";
+
+    computerHand.forEach(() => {
+
+        const tile = document.createElement("div");
+
+        tile.className = "back-tile";
+
+        computerHandElement.appendChild(tile);
+
+    });
+
+}
+
+
+/* -----------------------------
+   VALID MOVE
+----------------------------- */
+
+function canPlay(tile) {
+
+    if(boardTiles.length === 0) {
+        return true;
+    }
+
+    const leftEnd = boardTiles[0].a;
+    const rightEnd =
+        boardTiles[boardTiles.length - 1].b;
+
+    return (
+        tile.a === leftEnd ||
+        tile.b === leftEnd ||
+        tile.a === rightEnd ||
+        tile.b === rightEnd
+    );
+
+}
+
+
+/* -----------------------------
+   ORIENT TILE
+----------------------------- */
+
+function orientTile(tile, side) {
+
+    if(side === "left") {
+
+        if(tile.b === boardTiles[0].a) {
+
+            return {
+                a: tile.a,
+                b: tile.b
+            };
+
+        }
+
+        return {
+            a: tile.b,
+            b: tile.a
+        };
+
+    }
+
+    if(tile.a === boardTiles[boardTiles.length - 1].b) {
+
+        return {
+            a: tile.a,
+            b: tile.b
+        };
+
+    }
+
+    return {
+        a: tile.b,
+        b: tile.a
+    };
+
+}
+
+
+/* -----------------------------
+   PLAYER MOVE
+----------------------------- */
+
+function playPlayerTile(index) {
+
+    if(gameOver || !playerTurn) return;
+
+    const tile = playerHand[index];
+
+    if(!canPlay(tile)) {
+
+        message.textContent =
+            "❌ That tile doesn't match the board!";
+
+        return;
+
+    }
+
+    if(boardTiles.length === 0) {
+
+        boardTiles.push(tile);
+
+    } else {
+
+        const leftEnd = boardTiles[0].a;
+        const rightEnd =
+            boardTiles[boardTiles.length - 1].b;
+
+        if(tile.b === leftEnd || tile.a === leftEnd) {
+
+            boardTiles.unshift(
+                orientTile(tile, "left")
+            );
+
+        } else {
+
+            boardTiles.push(
+                orientTile(tile, "right")
+            );
+
+        }
+
+    }
+
+    playerHand.splice(index, 1);
+
+    if(playerHand.length === 0) {
+
+        endGame("🎉 YOU WIN!");
+
+        return;
+
+    }
+
+    playerTurn = false;
+
+    render();
+
+    setTimeout(computerMove, 900);
+
+}
+
+
+/* -----------------------------
+   COMPUTER MOVE
+----------------------------- */
+
+function computerMove() {
+
+    if(gameOver) return;
+
+    let playableIndex = -1;
+
+    for(let i = 0; i < computerHand.length; i++) {
+
+        if(canPlay(computerHand[i])) {
+
+            playableIndex = i;
+            break;
+
+        }
+
+    }
+
+    if(playableIndex === -1) {
+
+        if(deck.length > 0) {
+
+            computerHand.push(deck.pop());
+
+            message.textContent =
+                "🤖 Computer drew a tile.";
+
+            render();
+
+            setTimeout(computerMove, 700);
+
+            return;
+
+        }
+
+        message.textContent =
+            "🤖 Computer passes.";
+
+        playerTurn = true;
+
+        render();
+
+        return;
+
+    }
+
+    const tile = computerHand.splice(playableIndex, 1)[0];
+
+    if(boardTiles.length === 0) {
+
+        boardTiles.push(tile);
+
+    } else {
+
+        const leftEnd = boardTiles[0].a;
+        const rightEnd =
+            boardTiles[boardTiles.length - 1].b;
+
+        if(tile.a === rightEnd || tile.b === rightEnd) {
+
+            boardTiles.push(
+                orientTile(tile, "right")
+            );
+
+        } else {
+
+            boardTiles.unshift(
+                orientTile(tile, "left")
+            );
+
+        }
+
+    }
+
+    message.textContent =
+        "🤖 Computer played a tile.";
+
+    if(computerHand.length === 0) {
+
+        endGame("🤖 COMPUTER WINS!");
+
+        return;
+
+    }
+
+    playerTurn = true;
+
+    render();
+
+}
+
+
+/* -----------------------------
+   DRAW TILE
+----------------------------- */
+
+drawBtn.addEventListener("click", () => {
+
+    if(gameOver || !playerTurn) return;
+
+    if(deck.length === 0) {
+
+        message.textContent =
+            "No more tiles available. Try passing.";
+
+        return;
+
+    }
+
+    const tile = deck.pop();
+
+    playerHand.push(tile);
+
+    message.textContent =
+        "You drew a tile. Try to play it.";
+
+    render();
+
+});
+
+
+/* -----------------------------
+   PASS
+----------------------------- */
+
+passBtn.addEventListener("click", () => {
+
+    if(gameOver || !playerTurn) return;
+
+    const possibleMove =
+        playerHand.some(tile => canPlay(tile));
+
+    if(possibleMove) {
+
+        message.textContent =
+            "⚠️ You have a playable tile. You cannot pass.";
+
+        return;
+
+    }
+
+    message.textContent =
+        "You passed. Computer's turn.";
+
+    playerTurn = false;
+
+    render();
+
+    setTimeout(computerMove, 800);
+
+});
+
+
+/* -----------------------------
+   GAME OVER
+----------------------------- */
+
+function endGame(text) {
+
+    gameOver = true;
+
+    if(text.includes("YOU")) {
+
+        playerScore++;
+
+    } else {
+
+        computerScore++;
+
+    }
+
+    message.textContent =
+        text + " Press New Game to play again.";
+
+    render();
+
+}
+
+
+/* -----------------------------
+   NEW GAME
+----------------------------- */
+
+restartBtn.addEventListener("click", () => {
+
+    startGame();
+
+});
+
+
+/* -----------------------------
+   START
+----------------------------- */
+
+startGame();
+
+</script>
+
+</body>
+</html>
